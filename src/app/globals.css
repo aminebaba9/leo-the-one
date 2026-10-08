@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cold greens + white theme */
+  --color-ink: #062b23;
+  --color-ink-2: #0b3d31;
+  --color-ink-3: #11533f;
+  --color-paper: #f5fbf8;
+  --color-paper-2: #e6f2ec;
+  --color-accent: #0f9f6e;
+  --color-accent-deep: #0b7a54;
+  --color-lime: #4ee0b0;
+  --color-frost: #0e9cba;
+  --color-muted: #5e7d71;
+  --color-line: rgba(6, 43, 35, 0.12);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+.floaty {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 16s linear infinite;
+}
+
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(40px, -30px) scale(1.15);
+  }
+  66% {
+    transform: translate(-30px, 24px) scale(0.95);
+  }
+}
+
+.blob {
+  animation: blob 18s ease-in-out infinite;
+}
+
+@keyframes gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient {
+  background-size: 200% 200%;
+  animation: gradient-pan 8s ease infinite;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Layered "3D extrusion" for the big hero title */
+.hero-title {
+  text-shadow:
+    0 2px 0 #0c875e,
+    0 4px 0 #0a7551,
+    0 6px 0 #086344,
+    0 8px 0 #065138,
+    0 10px 0 #043f2c,
+    0 24px 50px rgba(6, 43, 35, 0.55);
+}
+
+.text-stroke {
+  -webkit-text-stroke: 2px var(--color-paper);
+  color: transparent;
+}
+
+/* Hide scrollbar for horizontal scrollers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ---------- RTL (Arabic) ---------- */
+
+[dir="rtl"] body {
+  font-family: var(--font-body-ar), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+[dir="rtl"] .font-display {
+  font-family: var(--font-display-ar), var(--font-display), ui-sans-serif, sans-serif;
+}
+
+/* Letter-spacing looks broken on Arabic text */
+[dir="rtl"] [class*="tracking-"] {
+  letter-spacing: 0;
+}
+
+/* Generated physical-utility flips (ml/mr/pl/pr/left/right/text-left/right/border/rounded/space-x) */
+[dir="rtl"] .-left-2 { left: auto; right: -0.5rem; }
+[dir="rtl"] .-left-32 { left: auto; right: -8.0rem; }
+[dir="rtl"] .-left-4 { left: auto; right: -1.0rem; }
+[dir="rtl"] .-right-1 { right: auto; left: -0.25rem; }
+[dir="rtl"] .-right-14 { right: auto; left: -3.5rem; }
+[dir="rtl"] .-right-3 { right: auto; left: -0.75rem; }
+[dir="rtl"] .border-r { border-right-width: 0; border-left-width: 1px; }
+[dir="rtl"] .left-3 { left: auto; right: 0.75rem; }
+[dir="rtl"] .left-4 { left: auto; right: 1.0rem; }
+[dir="rtl"] .left-6 { left: auto; right: 1.5rem; }
+[dir="rtl"] .ml-1 { margin-left: 0; margin-right: 0.25rem; }
+[dir="rtl"] .mr-0\.5 { margin-right: 0; margin-left: 0.125rem; }
+[dir="rtl"] .mr-1 { margin-right: 0; margin-left: 0.25rem; }
+[dir="rtl"] .pl-11 { padding-left: 0; padding-right: 2.75rem; }
+[dir="rtl"] .pl-9 { padding-left: 0; padding-right: 2.25rem; }
+[dir="rtl"] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+[dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1.0rem; }
+[dir="rtl"] .right-0 { right: auto; left: 0.0rem; }
+[dir="rtl"] .right-3 { right: auto; left: 0.75rem; }
+[dir="rtl"] .right-4 { right: auto; left: 1.0rem; }
+[dir="rtl"] .text-left { text-align: right; }
+[dir="rtl"] .text-right { text-align: left; }
+[dir="rtl"] .right-1\/4 { right: auto; left: 25%; }
