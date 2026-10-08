@@ -20,17 +20,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { t } = await getT();
   const store = await getSettings();
 
-  const [product] = await db
-    .select()
-    .from(products)
-    .where(and(eq(products.slug, slug), eq(products.active, true)))
-    .limit(1);
+  let product: (typeof products.$inferSelect) | undefined;
+  let upsell: (typeof products.$inferSelect) | undefined;
 
-  if (!product) notFound();
+  try {
+    const rows = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.slug, slug), eq(products.active, true)))
+      .limit(1);
+    product = rows[0];
 
-  // The "complete the fit" add-on, shown inside the order form.
-  const upsell = product.upsellProductId
-    ? await db
+    if (product?.upsellProductId) {
+      const upsellRows = await db
         .select()
         .from(products)
         .where(
@@ -39,9 +41,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
             eq(products.active, true),
           ),
         )
-        .limit(1)
-        .then((rows) => (rows[0]?.stock > 0 ? rows[0] : undefined))
-    : undefined;
+        .limit(1);
+      if (upsellRows[0] && upsellRows[0].stock > 0) {
+        upsell = upsellRows[0];
+      }
+    }
+  } catch (err) {
+    console.error("Failed to query product:", err);
+  }
+
+  if (!product) notFound();
 
   const combosContaining = await db
     .select()

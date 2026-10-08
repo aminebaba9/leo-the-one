@@ -46,12 +46,17 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         ? [desc(products.price)]
         : [desc(products.createdAt)];
 
-  const items: Product[] = await db
-    .select()
-    .from(products)
-    .where(and(...conditions))
-    .orderBy(...orderBy)
-    .limit(100);
+  let items: Product[] = [];
+  try {
+    items = await db
+      .select()
+      .from(products)
+      .where(and(...conditions))
+      .orderBy(...orderBy)
+      .limit(100);
+  } catch (err) {
+    console.error("Failed to load shop products:", err);
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">

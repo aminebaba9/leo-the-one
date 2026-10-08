@@ -33,14 +33,15 @@ export default function HeroScene({
   freeShippingLabel,
   priceLabel,
 }: HeroSceneProps) {
-  const { t, locale } = useLocale();
+  const { t, locale, dir } = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
 
   const handleMove = (e: React.MouseEvent<HTMLElement>) => {
     const el = sectionRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const multiplier = dir === "rtl" ? -1 : 1;
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * multiplier;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     el.style.setProperty("--mx", x.toFixed(3));
     el.style.setProperty("--my", y.toFixed(3));

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { useLocale } from "@/lib/i18n/locale-provider";
 
@@ -37,12 +38,12 @@ export default function GlobalError({
         >
           {ar ? "إعادة المحاولة" : "Réessayer"}
         </button>
-        <a
+        <Link
           href="/"
           className="rounded-full border border-line bg-white px-7 py-4 text-sm font-bold uppercase tracking-wider transition-colors hover:border-ink"
         >
           {ar ? "الصفحة الرئيسية" : "Accueil"}
-        </a>
+        </Link>
       </div>
     </div>
   );

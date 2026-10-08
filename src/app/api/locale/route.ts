@@ -5,9 +5,8 @@ export const dynamic = "force-dynamic";
 
 /**
  * Sets the locale cookie on the SERVER and redirects back to the requested
- * path. Doing this server-side (instead of document.cookie + router.refresh)
- * guarantees the next render uses the chosen language — the previous
- * client-only approach could be served a cached RSC payload and flip back.
+ * path. Doing this server-side guarantees the next render uses the chosen
+ * language reliably across RSC boundaries.
  *
  * Usage: /api/locale?l=ar&next=/shop
  */
@@ -20,21 +19,31 @@ function safeNext(raw: string | null): string {
 }
 
 /**
- * Builds an absolute redirect URL from the incoming Host header. Using
- * `req.url` directly can resolve to an internal address (0.0.0.0) when the
- * app runs behind a proxy such as Vercel or a platform healthcheck.
+ * Builds an absolute redirect URL preserving the actual scheme and host.
  */
 function baseUrl(req: NextRequest): string {
-  const host =
-    req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "localhost:3000";
-  const proto =
-    req.headers.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
+  const forwardedHost = req.headers.get("x-forwarded-host");
+  const host = (forwardedHost ?? req.headers.get("host") ?? req.nextUrl.host)
+    .split(",")[0]
+    .trim();
+
+  const forwardedProto = req.headers.get("x-forwarded-proto");
+  const proto = (forwardedProto ?? req.nextUrl.protocol.replace(/:$/, ""))
+    .split(",")[0]
+    .trim();
+
   return `${proto}://${host}`;
 }
 
 function build(req: NextRequest, locale: Locale, next: string) {
-  const res = NextResponse.redirect(new URL(next, baseUrl(req)));
+  let targetUrl: URL;
+  try {
+    targetUrl = new URL(next, baseUrl(req));
+  } catch {
+    targetUrl = new URL(next, req.nextUrl.origin);
+  }
+
+  const res = NextResponse.redirect(targetUrl);
   res.cookies.set(localeCookieName, locale, {
     path: "/",
     maxAge: localeCookieMaxAge,
@@ -49,10 +58,8 @@ export async function GET(req: NextRequest) {
   const requested = req.nextUrl.searchParams.get("l") ?? "";
   const next = safeNext(req.nextUrl.searchParams.get("next"));
 
-  if (!locales.includes(requested as Locale)) {
-    return build(req, "fr", next);
-  }
-  return build(req, requested as Locale, next);
+  const locale = locales.includes(requested as Locale) ? (requested as Locale) : "fr";
+  return build(req, locale, next);
 }
 
 export async function POST(req: NextRequest) {
@@ -60,8 +67,17 @@ export async function POST(req: NextRequest) {
   const requested = String(body.locale ?? "");
   const next = safeNext(typeof body.next === "string" ? body.next : "/");
 
-  if (!locales.includes(requested as Locale)) {
-    return build(req, "fr", next);
+  const locale = locales.includes(requested as Locale) ? (requested as Locale) : "fr";
+
+  if (req.headers.get("accept")?.includes("application/json")) {
+    const res = NextResponse.json({ ok: true, locale });
+    res.cookies.set(localeCookieName, locale, {
+      path: "/",
+      maxAge: localeCookieMaxAge,
+      sameSite: "lax",
+    });
+    return res;
   }
-  return build(req, requested as Locale, next);
+
+  return build(req, locale, next);
 }

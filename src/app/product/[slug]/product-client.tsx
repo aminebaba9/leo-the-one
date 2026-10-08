@@ -11,7 +11,7 @@ import { isValidAlgerianPhone, whatsappLink } from "@/lib/whatsapp";
 import { buildProductMessage } from "@/lib/whatsapp";
 import { trackInitiateCheckout, trackPurchase, trackViewContent } from "@/lib/pixels";
 import { ChevronBack } from "@/components/dir-arrow";
-import { WILAYAS } from "@/lib/wilayas";
+import { WILAYAS, formatWilayaLabel, getWilayaDisplayName } from "@/lib/wilayas";
 import {
   Check,
   Loader2,
@@ -509,7 +509,7 @@ export default function ProductClient({ product, upsell, store }: ProductClientP
                 <option value="">{t("checkout.wilayaPlaceholder")}</option>
                 {WILAYAS.map((w) => (
                   <option key={w.code} value={w.name}>
-                    {w.code} — {w.name}
+                    {formatWilayaLabel(w, locale)}
                   </option>
                 ))}
               </select>
@@ -518,7 +518,7 @@ export default function ProductClient({ product, upsell, store }: ProductClientP
                   <Truck className="h-3.5 w-3.5" />
                   {shippingFee === 0
                     ? t("checkout.freeShip")
-                    : t("checkout.shipTo", { wilaya, fee: formatDZD(shippingFee, locale) })}
+                    : t("checkout.shipTo", { wilaya: getWilayaDisplayName(wilaya, locale), fee: formatDZD(shippingFee, locale) })}
                 </p>
               ) : null}
             </div>

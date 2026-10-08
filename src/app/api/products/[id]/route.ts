@@ -33,8 +33,8 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
   const updates: Record<string, unknown> = { updatedAt: new Date() };
   if (body.name !== undefined) updates.name = String(body.name).trim();
   if (body.slug !== undefined) {
-    const base = String(body.slug).trim() || slugify(String(body.name ?? ""));
-    updates.slug = base;
+    const base = slugify(String(body.slug).trim() || String(body.name ?? ""));
+    updates.slug = base || `product-${id}`;
   }
   if (body.description !== undefined) updates.description = String(body.description ?? "");
   if (body.category !== undefined) updates.category = body.category === "hoodie" ? "hoodie" : "tshirt";

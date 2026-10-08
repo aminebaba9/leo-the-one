@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: t("api.errPrice") }, { status: 400 });
   }
 
-  let slug = String(body.slug ?? "").trim() || slugify(name);
+  let slug = slugify(String(body.slug ?? "").trim() || name);
+  if (!slug) slug = `product-${Date.now().toString(36)}`;
   const existing = await db.select({ id: products.id }).from(products).where(eq(products.slug, slug)).limit(1);
   if (existing.length > 0) slug = `${slug}-${Math.floor(Math.random() * 10000)}`;
 

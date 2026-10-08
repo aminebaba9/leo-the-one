@@ -151,6 +151,16 @@ body {
 
 /* ---------- RTL (Arabic) ---------- */
 
+[dir="rtl"] .marquee-track {
+  animation: marquee-rtl 30s linear infinite;
+}
+
+@keyframes marquee-rtl {
+  to {
+    transform: translateX(50%);
+  }
+}
+
 [dir="rtl"] body {
   font-family: var(--font-body-ar), var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }

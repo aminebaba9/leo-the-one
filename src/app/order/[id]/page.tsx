@@ -7,6 +7,7 @@ import { getSettings } from "@/lib/settings";
 import { translateColor, translateStatus } from "@/lib/i18n";
 import { getT } from "@/lib/i18n/server";
 import { formatDZD, formatDate, ORDER_STATUSES } from "@/lib/utils";
+import { getWilayaDisplayName } from "@/lib/wilayas";
 import OrderActions from "@/app/order/[id]/order-actions";
 import { CheckCircle2, Clock, MapPin, Phone, Truck, User } from "lucide-react";
 
@@ -23,7 +24,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
   const { t, locale } = await getT();
   const store = await getSettings();
 
-  const [order] = await db.select().from(orders).where(eq(orders.id, Number(id))).limit(1);
+  let order: (typeof orders.$inferSelect) | undefined;
+  try {
+    const rows = await db.select().from(orders).where(eq(orders.id, Number(id))).limit(1);
+    order = rows[0];
+  } catch (err) {
+    console.error("Failed to query order:", err);
+  }
   if (!order) notFound();
 
   const currentStep = Math.max(0, STATUS_STEPS.indexOf(order.status));
@@ -89,7 +96,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
             <Phone className="h-4 w-4 text-accent" /> {order.phone}
           </li>
           <li className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-accent" /> {order.wilaya}, {order.address}
+            <MapPin className="h-4 w-4 text-accent" /> {getWilayaDisplayName(order.wilaya, locale)}, {order.address}
           </li>
           <li className="flex items-center gap-2">
             <Truck className="h-4 w-4 text-accent" /> {store.deliveryCompany} · {t("hero.cod")}

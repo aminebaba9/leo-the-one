@@ -3,8 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { StoreSettings } from "@/db/schema";
-import { WILAYAS } from "@/lib/wilayas";
-import { useT } from "@/lib/i18n/locale-provider";
+import { WILAYAS, formatWilayaLabel } from "@/lib/wilayas";
+import { useLocale } from "@/lib/i18n/locale-provider";
 import { Loader2, Save } from "lucide-react";
 
 interface SettingsFormProps {
@@ -17,7 +17,7 @@ const labelClass = "text-xs font-bold uppercase tracking-[0.18em] text-muted";
 
 export default function SettingsForm({ settings }: SettingsFormProps) {
   const router = useRouter();
-  const t = useT();
+  const { t, locale } = useLocale();
 
   const [storeName, setStoreName] = useState(settings.storeName);
   const [storeTagline, setStoreTagline] = useState(settings.storeTagline);
@@ -169,7 +169,7 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
             {WILAYAS.map((w) => (
               <div key={w.code}>
                 <label className="text-xs font-semibold text-muted">
-                  {w.code} — {w.name}
+                  {formatWilayaLabel(w, locale)}
                 </label>
                 <input
                   type="number"

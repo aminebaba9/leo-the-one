@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { StoreSettings } from "@/db/schema";
 import LanguageSwitcher from "@/lib/i18n/language-switcher";
+import MobileMenu from "@/components/mobile-menu";
 import { getT } from "@/lib/i18n/server";
 import { whatsappLink } from "@/lib/whatsapp";
 import { MessageCircle } from "lucide-react";
@@ -55,6 +56,7 @@ export default async function Header({ store }: HeaderProps) {
               <MessageCircle className="h-4 w-4" />
               {t("nav.whatsapp")}
             </a>
+            <MobileMenu whatsappLink={wa} />
           </div>
         </div>
       </div>

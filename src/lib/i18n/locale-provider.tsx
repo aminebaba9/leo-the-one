@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -32,32 +33,44 @@ export function LocaleProvider({
 }) {
   const pathname = usePathname();
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const [prevInitialLocale, setPrevInitialLocale] = useState(initialLocale);
 
-  // Keep in sync when the server renders a different locale (after switching).
-  useEffect(() => {
+  // Sync state if initialLocale changes from server render
+  if (prevInitialLocale !== initialLocale) {
+    setPrevInitialLocale(initialLocale);
     setLocaleState(initialLocale);
-  }, [initialLocale]);
+  }
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = localeDir(locale);
+  }, [locale]);
 
   const t = useMemo(() => createT(getDictionary(locale)), [locale]);
 
   /**
-   * Writes the cookie client-side for optimistic UI, then performs a FULL
-   * document navigation through /api/locale. The server re-writes the cookie
-   * and returns a redirect, so the rendered HTML is always the chosen
-   * language. This avoids the cached-RSC bug that flipped Arabic back to
-   * French.
+   * Writes the cookie client-side, updates HTML lang & dir immediately,
+   * then performs a document navigation through /api/locale with the full path & query.
    */
-  const setLocale = (next: Locale) => {
-    if (next === locale) return;
-    document.cookie = `${localeCookieName}=${next}; path=/; max-age=${localeCookieMaxAge}; samesite=lax`;
-    setLocaleState(next);
-    const target = pathname && pathname !== "" ? pathname : "/";
-    window.location.href = `/api/locale?l=${next}&next=${encodeURIComponent(target)}`;
-  };
+  const setLocale = useCallback(
+    (next: Locale) => {
+      if (next === locale) return;
+      document.cookie = `${localeCookieName}=${next}; path=/; max-age=${localeCookieMaxAge}; samesite=lax`;
+      document.documentElement.lang = next;
+      document.documentElement.dir = localeDir(next);
+      setLocaleState(next);
+      const target =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : pathname || "/";
+      window.location.href = `/api/locale?l=${next}&next=${encodeURIComponent(target)}`;
+    },
+    [locale, pathname],
+  );
 
   const value = useMemo<LocaleContextValue>(
-    () => ({ locale, dir: localeDir(locale), pathname, t, setLocale }),
-    [locale, pathname, t],
+    () => ({ locale, dir: localeDir(locale), pathname: pathname || "/", t, setLocale }),
+    [locale, pathname, t, setLocale],
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

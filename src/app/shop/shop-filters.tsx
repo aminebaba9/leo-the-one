@@ -27,10 +27,12 @@ export default function ShopFilters() {
   const q = searchParams.get("q") ?? "";
 
   const [query, setQuery] = useState(q);
+  const [prevQ, setPrevQ] = useState(q);
 
-  useEffect(() => {
+  if (prevQ !== q) {
+    setPrevQ(q);
     setQuery(q);
-  }, [q]);
+  }
 
   const update = (next: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());

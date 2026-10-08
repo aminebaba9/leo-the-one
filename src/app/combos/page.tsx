@@ -15,17 +15,24 @@ export default async function CombosPage() {
   const store = await getSettings();
   const { t, locale } = await getT();
 
-  const combos = await db
-    .select()
-    .from(products)
-    .where(and(eq(products.active, true), eq(products.isCombo, true)))
-    .orderBy(products.price);
+  let combos: (typeof products.$inferSelect)[] = [];
+  let memberNames = new Map<number, string>();
 
-  const allIds = [...new Set(combos.flatMap((c) => c.comboProductIds))];
-  const members = allIds.length
-    ? await db.select().from(products).where(inArray(products.id, allIds))
-    : [];
-  const memberNames = new Map(members.map((m) => [m.id, m.name]));
+  try {
+    combos = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.active, true), eq(products.isCombo, true)))
+      .orderBy(products.price);
+
+    const allIds = [...new Set(combos.flatMap((c) => c.comboProductIds))];
+    const members = allIds.length
+      ? await db.select().from(products).where(inArray(products.id, allIds))
+      : [];
+    memberNames = new Map(members.map((m) => [m.id, m.name]));
+  } catch (err) {
+    console.error("Failed to load combos:", err);
+  }
 
   return (
     <>

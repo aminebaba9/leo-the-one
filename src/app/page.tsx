@@ -19,19 +19,26 @@ export default async function HomePage() {
   const store = await getSettings();
   const { t, locale } = await getT();
 
-  const featured = await db
-    .select()
-    .from(products)
-    .where(and(eq(products.active, true), eq(products.featured, true)))
-    .orderBy(desc(products.createdAt))
-    .limit(4);
+  let featured: (typeof products.$inferSelect)[] = [];
+  let combos: (typeof products.$inferSelect)[] = [];
 
-  const combos = await db
-    .select()
-    .from(products)
-    .where(and(eq(products.active, true), eq(products.isCombo, true)))
-    .orderBy(desc(products.createdAt))
-    .limit(3);
+  try {
+    featured = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.active, true), eq(products.featured, true)))
+      .orderBy(desc(products.createdAt))
+      .limit(4);
+
+    combos = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.active, true), eq(products.isCombo, true)))
+      .orderBy(desc(products.createdAt))
+      .limit(3);
+  } catch (err) {
+    console.error("Failed to load featured products:", err);
+  }
 
   const wa = whatsappLink(
     store.whatsappNumber,

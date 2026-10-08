@@ -22,12 +22,20 @@ export function formatDate(value: Date | string, locale: Locale = "fr"): string 
 }
 
 export function slugify(input: string): string {
-  return input
+  const ascii = input
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+  if (ascii) return ascii;
+
+  const unicode = input
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/(^-|-$)/g, "");
+  return unicode || `item-${Date.now().toString(36)}`;
 }
 
 export function discountPercent(price: number, compareAtPrice?: number | null): number {
